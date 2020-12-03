@@ -1,6 +1,7 @@
 import sys
 import json
 import torch
+import torchvision
 import numpy as np
 import argparse
 import torchvision.transforms as transforms
@@ -9,6 +10,8 @@ from DRL.ddpg import decode
 from utils.util import *
 from PIL import Image
 from torchvision import transforms, utils
+import torchvision.datasets as datasets
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 aug = transforms.Compose(
@@ -19,10 +22,10 @@ aug = transforms.Compose(
 width = 128
 convas_area = width * width
 
-img_train = []
-img_test = []
-train_num = 0
-test_num = 0
+# img_train = []
+# img_test = []
+# train_num = 0
+# test_num = 0
 
 class Paint:
     def __init__(self, batch_size, max_step):
@@ -31,31 +34,43 @@ class Paint:
         self.action_space = (13)
         self.observation_space = (self.batch_size, width, width, 7)
         self.test = False
+
+        self.img_train = []
+        self.img_test = []
+        self.train_num = 0
+        self.test_num = 0
         
-    def load_data(self):
-        # CelebA
-        global train_num, test_num
-        for i in range(200000):
-            img_id = '%06d' % (i + 1)
-            try:
-                img = cv2.imread('./data/img_align_celeba/' + img_id + '.jpg', cv2.IMREAD_UNCHANGED)
-                img = cv2.resize(img, (width, width))
-                if i > 2000:                
-                    train_num += 1
-                    img_train.append(img)
-                else:
-                    test_num += 1
-                    img_test.append(img)
-            finally:
-                if (i + 1) % 10000 == 0:                    
-                    print('loaded {} images'.format(i + 1))
+    def load_data(self, dataset):
+        """
+        @param dataset: A String representing the dataset
+        """
+        if dataset == "MNIST":
+            self.img_train = datasets.MNIST(root='./data', train=True, download=True, transform=None).data
+            self.img_test = datasets.MNIST(root='./data', train=False, download=True, transform=None).data
+            self.train_num = len(self.img_train)
+            self.test_num = len(self.img_test)
+        else: # CelebA
+            for i in range(200000):
+                img_id = '%06d' % (i + 1)
+                try:
+                    img = cv2.imread('./data/img_align_celeba/' + img_id + '.jpg', cv2.IMREAD_UNCHANGED)
+                    img = cv2.resize(img, (width, width))
+                    if i > 2000:                
+                        self.train_num += 1
+                        self.img_train.append(img)
+                    else:
+                        self.test_num += 1
+                        self.img_test.append(img)
+                finally:
+                    if (i + 1) % 10000 == 0:                    
+                        print('loaded {} images'.format(i + 1))
         print('finish loading data, {} training images, {} testing images'.format(str(train_num), str(test_num)))
         
     def pre_data(self, id, test):
         if test:
-            img = img_test[id]
+            img = self.img_test[id]
         else:
-            img = img_train[id]
+            img = self.img_train[id]
         if not test:
             img = aug(img)
         img = np.asarray(img)
