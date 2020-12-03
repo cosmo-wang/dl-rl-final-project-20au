@@ -5,8 +5,7 @@ import torch.nn.functional as F
 from torch.optim import Adam, SGD
 from Renderer.model import *
 from DRL.replay_buffer import replay_buffer
-from DRL.actor import *
-from DRL.critic import *
+from ResNet import *
 from DRL.wgan import *
 from utils.util import *
 
@@ -47,10 +46,10 @@ class DDPG_copy():
         self.env_batch = env_batch
         self.batch_size = batch_size        
 
-        self.actor = ResNet(7, 18, 65) # target, canvas, stepnum 3 + 3 + 1
-        self.actor_target = ResNet(7, 18, 65)
-        self.critic = ResNet_wobn(3 + 7, 18, 1) # add the last canvas for better prediction
-        self.critic_target = ResNet_wobn(3 + 7, 18, 1)
+        self.actor = ResNet("actor", 7, 18, 65) # target, canvas, stepnum 3 + 3 + 1
+        self.actor_target = ResNet("actor", 7, 18, 65)
+        self.critic = ResNet("critic", 3 + 7, 18, 1) # add the last canvas for better prediction
+        self.critic_target = ResNet("critic", 3 + 7, 18, 1)
 
         self.actor_optimizer = Adam(self.actor.parameters(), lr=1e-2)
         self.critic_optimizer = Adam(self.critic.parameters(), lr=1e-2)
