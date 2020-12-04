@@ -15,7 +15,7 @@ class FastEnv():
         self.env.load_data("MNIST")
         self.observation_space = self.env.observation_space
         self.action_space = self.env.action_space
-        self.writer = writer
+        # self.writer = writer
         self.test = False
         self.log = 0
 
@@ -23,14 +23,14 @@ class FastEnv():
         for i in range(self.env_batch):
             if self.env.imgid[i] <= 10:
                 canvas = cv2.cvtColor((to_numpy(self.env.canvas[i].permute(1, 2, 0))), cv2.COLOR_BGR2RGB)
-                self.writer.add_image('{}/canvas_{}.png'.format(str(self.env.imgid[i]), str(step)), canvas, log)
+                # self.writer.add_image('{}/canvas_{}.png'.format(str(self.env.imgid[i]), str(step)), canvas, log)
         if step == self.max_episode_length:
             for i in range(self.env_batch):
                 if self.env.imgid[i] < 50:
                     gt = cv2.cvtColor((to_numpy(self.env.gt[i].permute(1, 2, 0))), cv2.COLOR_BGR2RGB)
                     canvas = cv2.cvtColor((to_numpy(self.env.canvas[i].permute(1, 2, 0))), cv2.COLOR_BGR2RGB)
-                    self.writer.add_image(str(self.env.imgid[i]) + '/_target.png', gt, log)
-                    self.writer.add_image(str(self.env.imgid[i]) + '/_canvas.png', canvas, log)
+                    # self.writer.add_image(str(self.env.imgid[i]) + '/_target.png', gt, log)
+                    # self.writer.add_image(str(self.env.imgid[i]) + '/_canvas.png', canvas, log)
     
     def step(self, action):
         with torch.no_grad():
@@ -39,7 +39,7 @@ class FastEnv():
             if not self.test:
                 self.dist = self.get_dist()
                 for i in range(self.env_batch):
-                    self.writer.add_scalar('train/dist', self.dist[i], self.log)
+                    # self.writer.add_scalar('train/dist', self.dist[i], self.log)
                     self.log += 1
         return ob, r, d, _
 
