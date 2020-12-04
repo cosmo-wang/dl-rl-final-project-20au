@@ -30,7 +30,7 @@ def train(agent, env, evaluate):
         # reset if it is the start of episode
         if observation is None:
             observation = env.reset()
-            agent.reset(observation, noise_factor)    
+            agent.reset(observation)    
         action = agent.select_action(observation)
         observation, reward, done, _ = env.step(action)
         agent.observe(reward, observation, done, step)
