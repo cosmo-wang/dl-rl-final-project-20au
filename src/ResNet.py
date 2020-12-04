@@ -46,11 +46,12 @@ class TReLU(nn.Module):
 
 
 class BasicBlock(nn.Module):
-    def __init__(self, type, in_channels, out_channels, stride=1, expansion=1):
+    expansion = 1
+    def __init__(self, type, in_channels, out_channels, stride=1):
         super(BasicBlock, self).__init__()
         if type == "actor":
             conv = normed_conv
-            relu = nn.relu()
+            relu = nn.ReLU()
         else:
             conv = Conv2d
             relu = TReLU()
@@ -60,7 +61,6 @@ class BasicBlock(nn.Module):
         self.relu2 = relu
 
         self.shortcut = nn.Sequential()
-        self.expansion = expansion
         if stride != 1 or in_channels != self.expansion * out_channels:
             self.shortcut = nn.Sequential(
                 conv(in_channels, self.expansion*out_channels, stride=stride, kernel_size=1, padding=0)
@@ -76,11 +76,12 @@ class BasicBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    def __init__(self, type, in_channels, out_channels, stride=1, expansion=4):
+    expansion = 4
+    def __init__(self, type, in_channels, out_channels, stride=1):
         super(Bottleneck, self).__init__()
         if type == "actor":
             conv = normed_conv
-            relu = nn.relu()
+            relu = nn.ReLU()
         else:
             conv = Conv2d
             relu = TReLU()
@@ -92,7 +93,6 @@ class Bottleneck(nn.Module):
         self.relu3 = relu
 
         self.shortcut = nn.Sequential()
-        self.expansion = expansion
         if stride != 1 or in_channels != self.expansion*out_channels:
             if type == "actor":
                 self.shortcut = nn.Sequential(
@@ -123,13 +123,13 @@ class ResNet(nn.Module):
 
         if self.type == "actor":
             conv = normed_conv
-            relu = None.relu()
+            relu = nn.ReLU()
         else:
             conv = Conv2d
             relu = TReLU()
 
         self.conv1 = conv(num_inputs, 64, 2)
-        self.relu1 = relu()
+        self.relu1 = relu
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=2)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
