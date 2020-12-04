@@ -75,8 +75,11 @@ class Paint:
             img = self.img_test[id]
         else:
             img = self.img_train[id]
-        if not test:
-            img = aug(img)
+        # For CelebA:
+        # if not test:
+        #     img = aug(img)
+        # For MNIST:
+        img = aug(img)
         img = np.asarray(img)
         return np.transpose(img, (2, 0, 1))
     
