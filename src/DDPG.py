@@ -3,19 +3,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import Adam, SGD
-from Renderer.model import *
-from DRL.replay_buffer import replay_buffer
-from ResNet import *
-from DRL.wgan import *
-from utils.util import *
+from src.renderer_model import FCN
+from src.replay_buffer import replay_buffer
+from src.ResNet import *
+from src.wgan import *
+from src.util import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-def soft_update(target, source, tau):
-    for target_param, param in zip(target.parameters(), source.parameters()):
-        target_param.data.copy_(
-            target_param.data * (1.0 - tau) + param.data * tau
-        )
 
 class Painter():
     def __init__(self, path):
@@ -35,7 +29,7 @@ class Painter():
             state = state * (1 - stroke[:, i]) + color_stroke[:, i]
         return state
 
-class DDPG_copy():
+class DDPG():
     def __init__(self, batch_size=64, env_batch=1, max_step=40, \
                  tau=0.001, discount=0.9, buf_size=800, \
                  writer=None, resume_path=None):
@@ -192,11 +186,11 @@ class DDPG_copy():
         self.critic.load_state_dict(torch.load('{}/critic.pkl'.format(path)))
         load_gan(path)
 
-    def save_model(self, path):
+    def save_model(self, step, path):
         self.actor.cpu()
         self.critic.cpu()
-        torch.save(self.actor.state_dict(),'{}/actor.pkl'.format(path))
-        torch.save(self.critic.state_dict(),'{}/critic.pkl'.format(path))
+        torch.save(self.actor.state_dict(),'{}/{step}_actor.pkl'.format(path, step))
+        torch.save(self.critic.state_dict(),'{}/{step}_critic.pkl'.format(path, step))
         save_gan(path)
         self.choose_device()
 

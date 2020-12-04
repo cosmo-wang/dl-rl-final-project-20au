@@ -50,7 +50,7 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         if type == "actor":
             conv = normed_conv
-            relu = nn.relu()
+            relu = F.relu()
         else:
             conv = Conv2d
             relu = TReLU()
@@ -80,7 +80,7 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         if type == "actor":
             conv = normed_conv
-            relu = nn.relu()
+            relu = F.relu()
         else:
             conv = Conv2d
             relu = TReLU()
@@ -123,7 +123,7 @@ class ResNet(nn.Module):
 
         if self.type == "actor":
             conv = normed_conv
-            relu = nn.relu()
+            relu = F.relu()
         else:
             conv = Conv2d
             relu = TReLU()

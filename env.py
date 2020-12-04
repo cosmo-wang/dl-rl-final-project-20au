@@ -6,8 +6,8 @@ import numpy as np
 import argparse
 import torchvision.transforms as transforms
 import cv2
-from DRL.ddpg import decode
-from utils.util import *
+from src.DDPG import Painter
+from src.util import *
 from PIL import Image
 from torchvision import transforms, utils
 import torchvision.datasets as datasets
@@ -39,6 +39,8 @@ class Paint:
         self.img_test = []
         self.train_num = 0
         self.test_num = 0
+
+        self.painter = Painter('./renderer.pkl')
         
     def load_data(self, dataset):
         """
@@ -64,7 +66,7 @@ class Paint:
                 finally:
                     if (i + 1) % 10000 == 0:                    
                         print('loaded {} images'.format(i + 1))
-        print('finish loading data, {} training images, {} testing images'.format(str(train_num), str(test_num)))
+        print('finish loading data, {} training images, {} testing images'.format(str(self.train_num), str(self.test_num)))
         
     def pre_data(self, id, test):
         if test:
@@ -105,7 +107,7 @@ class Paint:
         return (s.transpose(0, 3) * t).transpose(0, 3)
     
     def step(self, action):
-        self.canvas = (decode(action, self.canvas.float() / 255) * 255).byte()
+        self.canvas = (self.painter.paint(action, self.canvas.float() / 255) * 255).byte()
         self.stepnum += 1
         ob = self.observation()
         done = (self.stepnum == self.max_step)
