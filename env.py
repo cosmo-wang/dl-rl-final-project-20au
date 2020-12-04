@@ -43,6 +43,7 @@ class Paint:
         self.test_num = 0
 
         self.painter = Painter('./renderer.pkl')
+        self.painter.to(device)
         
     def load_data(self, dataset):
         """

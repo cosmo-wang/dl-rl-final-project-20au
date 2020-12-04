@@ -13,12 +13,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Painter():
     def __init__(self, path):
-        self.randerder = FCN()
-        self.randerder.load_state_dict(torch.load(path))
+        self.renderer = FCN()
+        self.renderer.load_state_dict(torch.load(path))
 
     def paint(self, action, state):
         action = action.view(-1, 10 + 3)
-        stroke = 1 - self.randerder(action[:, :10])
+        stroke = 1 - self.renderer(action[:, :10])
         stroke = stroke.view(-1, 128, 128, 1)
         color_stroke = stroke * action[:, -3:].view(-1, 1, 1, 3)
         stroke = stroke.permute(0, 3, 1, 2)
@@ -28,6 +28,9 @@ class Painter():
         for i in range(5):
             state = state * (1 - stroke[:, i]) + color_stroke[:, i]
         return state
+    
+    def to(self, device):
+        self.renderer.to(device)
 
 class DDPG():
     def __init__(self, batch_size=64, env_batch=1, max_step=40, \
@@ -195,7 +198,7 @@ class DDPG():
         self.choose_device()
 
     def choose_device(self):
-        # self.painter.to(device)
+        self.painter.to(device)
         self.actor.to(device)
         self.actor_target.to(device)
         self.critic.to(device)
