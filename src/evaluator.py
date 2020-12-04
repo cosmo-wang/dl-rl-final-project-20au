@@ -2,11 +2,12 @@ import numpy as np
 
 class Evaluator(object):
 
-    def __init__(self, args, writer):    
+    # def __init__(self, args, writer):    
+    def __init__(self, args):   
         self.validate_episodes = args.validate_episodes
         self.max_step = args.max_step
         self.env_batch = args.env_batch
-        self.writer = writer
+        # self.writer = writer
         self.log = 0
 
     def __call__(self, env, policy, debug=False):        
