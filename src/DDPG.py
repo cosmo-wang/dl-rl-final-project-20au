@@ -79,7 +79,7 @@ class DDPG():
         canvas = state[:, :3]
         gt = state[:, 3 : 6]
         fake, real, penal = update(canvas.float() / 255, gt.float() / 255)
-        if self.log % 20 == 0:
+        # if self.log % 20 == 0:
             # self.writer.add_scalar('train/gan_fake', fake, self.log)
             # self.writer.add_scalar('train/gan_real', real, self.log)
             # self.writer.add_scalar('train/gan_penal', penal, self.log)       
