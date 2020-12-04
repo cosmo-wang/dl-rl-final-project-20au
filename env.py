@@ -19,7 +19,7 @@ aug = transforms.Compose(
              transforms.RandomHorizontalFlip(),
              ])
 
-width = 128
+width = 28 # For MNIST #128 For CelebA
 convas_area = width * width
 
 # img_train = []
@@ -76,22 +76,25 @@ class Paint:
         if not test:
             img = aug(img)
         img = np.asarray(img)
-        return np.transpose(img, (2, 0, 1))
+        # return np.transpose(img, (2, 0, 1)) # For Celeb
+        return img # For MNIST
     
     def reset(self, test=False, begin_num=False):
         self.test = test
         self.imgid = [0] * self.batch_size
-        self.gt = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device)
+        # self.gt = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device) # For Celeb
+        self.gt = torch.zeros([self.batch_size, 1, width, width], dtype=torch.uint8).to(device) # For MNIST
         for i in range(self.batch_size):
             if test:
-                id = (i + begin_num)  % test_num
+                id = (i + begin_num)  % self.test_num
             else:
-                id = np.random.randint(train_num)
+                id = np.random.randint(self.train_num)
             self.imgid[i] = id
             self.gt[i] = torch.tensor(self.pre_data(id, test))
         self.tot_reward = ((self.gt.float() / 255) ** 2).mean(1).mean(1).mean(1)
         self.stepnum = 0
-        self.canvas = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device)
+        # self.canvas = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device) # For Celeb
+        self.canvas = torch.zeros([self.batch_size, 1, width, width], dtype=torch.uint8).to(device) # For MNIST
         self.lastdis = self.ini_dis = self.cal_dis()
         return self.observation()
     
