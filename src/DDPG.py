@@ -192,8 +192,8 @@ class DDPG():
     def save_model(self, step, path):
         self.actor.cpu()
         self.critic.cpu()
-        torch.save(self.actor.state_dict(),'{}/{step}_actor.pkl'.format(path, step))
-        torch.save(self.critic.state_dict(),'{}/{step}_critic.pkl'.format(path, step))
+        torch.save(self.actor.state_dict(),'{}/{}_actor.pkl'.format(path, step))
+        torch.save(self.critic.state_dict(),'{}/{}_critic.pkl'.format(path, step))
         save_gan(path)
         self.choose_device()
 
