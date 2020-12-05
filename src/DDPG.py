@@ -50,10 +50,17 @@ class DDPG():
         self.env_batch = env_batch
         self.batch_size = batch_size        
 
-        self.actor = ResNet("actor", 7, 18, 65) # target, canvas, stepnum 3 + 3 + 1
-        self.actor_target = ResNet("actor", 7, 18, 65)
-        self.critic = ResNet("critic", 3 + 7, 18, 1) # add the last canvas for better prediction
-        self.critic_target = ResNet("critic", 3 + 7, 18, 1)
+        # for RGB
+        # self.actor = ResNet("actor", 7, 18, 65) # target, canvas, stepnum 3 + 3 + 1
+        # self.actor_target = ResNet("actor", 7, 18, 65)
+        # self.critic = ResNet("critic", 3 + 7, 18, 1) # add the last canvas for better prediction
+        # self.critic_target = ResNet("critic", 3 + 7, 18, 1)
+
+        # for grayscale
+        self.actor = ResNet("actor", 3, 18, 65) # target, canvas, stepnum 3 + 3 + 1
+        self.actor_target = ResNet("actor", 3, 18, 65)
+        self.critic = ResNet("critic", 1 + 3, 18, 1) # add the last canvas for better prediction
+        self.critic_target = ResNet("critic", 1 + 3, 18, 1)
 
         self.actor_optimizer = Adam(self.actor.parameters(), lr=1e-2)
         self.critic_optimizer = Adam(self.critic.parameters(), lr=1e-2)
@@ -79,12 +86,18 @@ class DDPG():
         self.choose_device()
 
     def get_action(self, state, target=False):
-        state = torch.cat((state[:, :6].float() / 255, state[:, 6:7].float() / self.max_step), 1)
+        # state = torch.cat((state[:, :6].float() / 255, state[:, 6:7].float() / self.max_step), 1)  # for RGB
+        state = torch.cat((state[:, :2].float() / 255, state[:, 2:3].float() / self.max_step), 1)  # for grayscale
         return self.actor_target(state) if target else self.actor(state)
 
     def update_gan(self, state):
-        canvas = state[:, :3]
-        gt = state[:, 3 : 6]
+        # for RGB
+        # canvas = state[:, :3]
+        # gt = state[:, 3 : 6]
+        
+        # for grayscale
+        canvas = state[:, :1]
+        gt = state[:, 1 : 2]
         fake, real, penal = update(canvas.float() / 255, gt.float() / 255)
         # if self.log % 20 == 0:
             # self.writer.add_scalar('train/gan_fake', fake, self.log)
@@ -92,12 +105,21 @@ class DDPG():
             # self.writer.add_scalar('train/gan_penal', penal, self.log)       
         
     def evaluate(self, state, action, target=False):
+        # for RGB
+        # # step
+        # T = state[:, 6 : 7]
+        # # target image
+        # gt = state[:, 3 : 6].float() / 255
+        # # current canvas
+        # canvas0 = state[:, :3].float() / 255
+
+        # for grayscale
         # step
-        T = state[:, 6 : 7]
+        T = state[:, 2 : 3]
         # target image
-        gt = state[:, 3 : 6].float() / 255
+        gt = state[:, 1 : 2].float() / 255
         # current canvas
-        canvas0 = state[:, :3].float() / 255
+        canvas0 = state[:, :1].float() / 255
         # apply the action to get the updated canvas
         canvas1, _ = self.painter.paint(action, canvas0)
         # gan_reward is the additional reward by applying the current action

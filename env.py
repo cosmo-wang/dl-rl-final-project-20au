@@ -15,8 +15,8 @@ import torchvision.datasets as datasets
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 aug = transforms.Compose(
-            [transforms.Lambda(lambda x: x.repeat(3, 1, 1)), # ONLY FOR MNIST !!!!
-            transforms.ToPILImage(),
+            # [transforms.Lambda(lambda x: x.repeat(3, 1, 1)), # ONLY FOR MNIST !!!!
+            [transforms.ToPILImage(),
             transforms.Resize(128), # ONLY FOR MNIST !!!!
             transforms.RandomHorizontalFlip(),
              ])
@@ -34,7 +34,8 @@ class Paint:
         self.batch_size = batch_size
         self.max_step = max_step
         self.action_space = (13)
-        self.observation_space = (self.batch_size, width, width, 7)
+        # self.observation_space = (self.batch_size, width, width, 7)  # for RGB
+        self.observation_space = (self.batch_size, width, width, 3)  # for grayscale
         self.test = False
 
         self.img_train = []
@@ -82,12 +83,14 @@ class Paint:
         # For MNIST:
         img = aug(img)
         img = np.asarray(img)
-        return np.transpose(img, (2, 0, 1))
+        return img  # for grayscale
+        # return np.transpose(img, (2, 0, 1))  # for RGB
     
     def reset(self, test=False, begin_num=False):
         self.test = test
         self.imgid = [0] * self.batch_size
-        self.gt = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device) 
+        # self.gt = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device)  # for RGB
+        self.gt = torch.zeros([self.batch_size, 1, width, width], dtype=torch.uint8).to(device)  # for grayscale
         for i in range(self.batch_size):
             if test:
                 id = (i + begin_num)  % self.test_num
@@ -97,7 +100,8 @@ class Paint:
             self.gt[i] = torch.tensor(self.pre_data(id, test))
         self.tot_reward = ((self.gt.float() / 255) ** 2).mean(1).mean(1).mean(1)
         self.stepnum = 0
-        self.canvas = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device)
+        # self.canvas = torch.zeros([self.batch_size, 3, width, width], dtype=torch.uint8).to(device)  # for RGB
+        self.canvas = torch.zeros([self.batch_size, 1, width, width], dtype=torch.uint8).to(device)  # for grayscale
         self.lastdis = self.ini_dis = self.cal_dis()
         return self.observation()
     
