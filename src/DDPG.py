@@ -27,7 +27,8 @@ class Painter():
         color_stroke = color_stroke.view(-1, 5, 3, 128, 128)
         res = []
         for i in range(5):
-            state = state * (1 - stroke[:, i]) + color_stroke[:, i]
+            # state = state * (1 - stroke[:, i]) + color_stroke[:, i]  # for RGB
+            state = state * (1 - stroke[:, i])  # for grayscale
             res.append(state)
         return state, res
     
@@ -94,7 +95,7 @@ class DDPG():
         # for RGB
         # canvas = state[:, :3]
         # gt = state[:, 3 : 6]
-        
+
         # for grayscale
         canvas = state[:, :1]
         gt = state[:, 1 : 2]
