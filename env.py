@@ -113,7 +113,7 @@ class Paint:
         return (s.transpose(0, 3) * t).transpose(0, 3)
     
     def step(self, action):
-        self.canvas = (self.painter.paint(action, self.canvas.float() / 255) * 255).byte()
+        self.canvas = (self.painter.paint(action, self.canvas.float() / 255)[0] * 255).byte()
         self.stepnum += 1
         ob = self.observation()
         done = (self.stepnum == self.max_step)

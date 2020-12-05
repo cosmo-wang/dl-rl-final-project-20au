@@ -25,12 +25,19 @@ class Painter():
         color_stroke = color_stroke.permute(0, 3, 1, 2)
         stroke = stroke.view(-1, 5, 1, 128, 128)
         color_stroke = color_stroke.view(-1, 5, 3, 128, 128)
+        res = []
         for i in range(5):
             state = state * (1 - stroke[:, i]) + color_stroke[:, i]
-        return state
+            res.append(state)
+        return state, res
     
     def to(self, device):
         self.renderer.to(device)
+        return self
+
+    def eval(self):
+        self.renderer.eval()
+        return self
 
 class DDPG():
     def __init__(self, batch_size=64, env_batch=1, max_step=40, \
@@ -92,7 +99,7 @@ class DDPG():
         # current canvas
         canvas0 = state[:, :3].float() / 255
         # apply the action to get the updated canvas
-        canvas1 = self.painter.paint(action, canvas0)
+        canvas1, _ = self.painter.paint(action, canvas0)
         # gan_reward is the additional reward by applying the current action
         gan_reward = cal_reward(canvas1, gt) - cal_reward(canvas0, gt)
         # merge two canvases to pass to critic
