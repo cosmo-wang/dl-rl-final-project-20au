@@ -86,10 +86,10 @@ class DDPG():
         canvas = state[:, :3]
         gt = state[:, 3 : 6]
         fake, real, penal = update(canvas.float() / 255, gt.float() / 255)
-        if self.log % 20 == 0:
-            self.writer.add_scalar('train/gan_fake', fake, self.log)
-            self.writer.add_scalar('train/gan_real', real, self.log)
-            self.writer.add_scalar('train/gan_penal', penal, self.log)       
+        # if self.log % 20 == 0:
+            # self.writer.add_scalar('train/gan_fake', fake, self.log)
+            # self.writer.add_scalar('train/gan_real', real, self.log)
+            # self.writer.add_scalar('train/gan_penal', penal, self.log)       
         
     def evaluate(self, state, action, target=False):
         # step
@@ -109,9 +109,9 @@ class DDPG():
             return (V + gan_reward), gan_reward
         else:
             V = self.critic(merged_state)
-            if self.log % 20 == 0:
-                self.writer.add_scalar('train/expect_reward', Q.mean(), self.log)
-                self.writer.add_scalar('train/gan_reward', gan_reward.mean(), self.log)
+            # if self.log % 20 == 0:
+            #     self.writer.add_scalar('train/expect_reward', Q.mean(), self.log)
+            #     self.writer.add_scalar('train/gan_reward', gan_reward.mean(), self.log)
             return (V + gan_reward), gan_reward
 
     def update_policy(self, lr):
@@ -199,8 +199,8 @@ class DDPG():
     def save_model(self, step, path):
         self.actor.cpu()
         self.critic.cpu()
-        torch.save(self.actor.state_dict(),'{}/{step}_actor.pkl'.format(path, step))
-        torch.save(self.critic.state_dict(),'{}/{step}_critic.pkl'.format(path, step))
+        torch.save(self.actor.state_dict(),'{}/{}_actor.pkl'.format(path, step))
+        torch.save(self.critic.state_dict(),'{}/{}_critic.pkl'.format(path, step))
         save_gan(path)
         self.choose_device()
 
